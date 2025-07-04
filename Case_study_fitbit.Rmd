@@ -1,0 +1,127 @@
+---
+title: "Analyzing Activity and Sleep Patterns Using Fitbit Data to Inform Health Marketing Strategies"
+author: "Chris"
+date: "2025-07-04"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem Statement
+The goal of this case study is to understand users' physical activity and sleep behaviors using Fit-bit tracker data. By identifying trends and patterns, the insights can help guide personalized health marketing strategies and feature design to wear.
+
+##  Dataset Description
+Using the Fitbit dataset from Kaggle:
+https://www.kaggle.com/arashnic/fitbit
+
+Files used:
+
+* dailyActivity_merged.csv
+* sleepDay_merged.csv
+
+These contain:
+
+* Physical activity measures (steps, distance, calories, etc.)
+* Sleep behavior (total sleep time, time in bed, etc.)
+
+## Setup & Data Loading
+### Install and load necessary packacges
+```{r Install and load necessary packages}
+install.packages("tidyverse")
+library(tidyverse)
+install.packages("dplyr")
+library(dplyr)
+```
+### Load dataset
+```{r load dataset}
+daily_activity <- read.csv("dailyActivity_merged.csv")
+sleep_day <- read.csv("sleepDay_merged.csv")
+
+```
+### Explore Structure
+```{r Explore Structure}
+glimpse(daily_activity)
+glimpse(sleep_day)
+
+```
+
+## Data Cleaning & Summary Stats
+### Check participant count
+```{r Check participant count}
+n_distinct(daily_activity$Id)  
+n_distinct(sleep_day$Id)       
+
+```
+### Summary statistics
+```{r Summary statistics}
+summary(select(daily_activity, TotalSteps, TotalDistance, SedentaryMinutes))
+summary(select(sleep_day, TotalSleepRecords, TotalMinutesAsleep, TotalTimeInBed))
+
+```
+## Insights:
+
+* Almost all users recorded 1 sleep session per day, as expected.
+* Users sleep between 58 and 796 minutes/day, with a median of 433 mins (~7.2 hrs).
+* Time in bed is slightly longer—median of 463 mins (~7.7 hrs)—implying a ~30-minute gap between being in bed and actually sleeping.
+
+## Exploratory Data Analysis (EDA)
+### Relationship between steps and sedentary time
+```{r Relationship between steps and sedentary time}
+ggplot(daily_activity, aes(x = TotalSteps, y = SedentaryMinutes)) +
+  geom_point() +
+  labs(title = "Steps vs. Sedentary Minutes")
+
+```
+
+### Sleep vs. Time in Bed
+```{r Sleep vs. Time in Bed}
+ggplot(sleep_day, aes(x = TotalMinutesAsleep, y = TotalTimeInBed)) +
+  geom_point() +
+  labs(title = "Minutes Asleep vs. Time in Bed")
+```
+
+## Insight
+
+* More steps generally mean less sedentary time, but with exceptions.
+* Many users spend more time in bed than they actually sleep — indicating poor sleep efficiency.
+
+
+## Merging and Deeper Analysis
+### Merge datasets by Id
+```{r Merge datasets by Id}
+combined_data <- merge(sleep_day, daily_activity, by = "Id")
+```
+### How many participants in merged set?
+```{r}
+n_distinct(combined_data$Id)
+```
+
+### Sleep vs. Activity
+
+```{r Sleep vs. Activity}
+ggplot(combined_data, aes(x = TotalMinutesAsleep, y = TotalSteps)) +
+  geom_point() +
+  labs(title = "Sleep vs. Steps")
+
+```
+
+## Insight:
+There's no strong correlation between sleep and daily steps across this small sample, but outliers (very low or very high sleepers) may show interesting behavior.
+
+## Key Findings
+* Sedentary Lifestyle: Users are highly sedentary (over 16 hours/day).
+* Sleep Efficiency: Users spend significantly more time in bed than they actually sleep.
+* Marketing Insight: Positioning the Fitbit as a sleep efficiency tracker could resonate with poor sleepers; promoting gentle activity goals could appeal to sedentary users.
+
+## Recommendations
+* Introduce motivational features for users with low daily activity.
+* Develop sleep coaching based on time-in-bed vs. sleep duration.
+* Use segment-specific messaging: active users vs. sedentary ones.
+
+
+
+
+
+
+
